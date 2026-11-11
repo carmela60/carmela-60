@@ -22,12 +22,14 @@ const req = (b = body, { origin = ORIGIN, method = 'POST', headers = {}, path = 
   })
 
 // Finto internet: Turnstile, Apps Script (redirect 302) e pagina echo di Google.
-function net({ human = { success: true, action: 'rsvp', hostname: 'carmela.example' }, reply = { ok: true, id: ID }, location = ECHO } = {}) {
+function net({ human = { success: true, action: 'rsvp', hostname: 'carmela.example' }, reply = { ok: true, id: ID }, location = ECHO, echo } = {}) {
   const f = vi.fn(async (url, init = {}) => {
+    // Come il runtime di Cloudflare: redirect ammessi solo 'follow' o 'manual'.
+    if (init.redirect && !['follow', 'manual'].includes(init.redirect)) throw new TypeError('Invalid redirect value')
     const u = String(url)
     if (u.startsWith('https://challenges.cloudflare.com/')) return Response.json(human)
     if (u === SCRIPT) return new Response(null, { status: 302, headers: { Location: location } })
-    if (u === ECHO) return Response.json(reply)
+    if (u === ECHO) return echo ? echo() : Response.json(reply)
     throw new Error(`rete inattesa: ${u} ${init.method || 'GET'}`)
   })
   vi.stubGlobal('fetch', f)
@@ -138,6 +140,18 @@ describe('Worker: difese', () => {
       expect(await res.json()).toEqual({ ok: false, error: 'verify' })
       expect(f.mock.calls.some(([u]) => String(u) === SCRIPT)).toBe(false)
     }
+  })
+
+  it('legge la risposta di Google con opzioni accettate dal runtime Cloudflare', async () => {
+    const f = net()
+    expect((await worker.fetch(req(), makeEnv())).status).toBe(200)
+    const echoCall = f.mock.calls.find(([u]) => String(u) === ECHO)
+    expect(echoCall[1].redirect).toBe('manual')
+  })
+
+  it('non segue un secondo redirect dalla pagina di Google', async () => {
+    net({ echo: () => new Response(null, { status: 302, headers: { Location: 'https://evil.test/' } }) })
+    expect((await worker.fetch(req(), makeEnv())).status).toBe(502)
   })
 
   it('segue il redirect solo verso googleusercontent', async () => {

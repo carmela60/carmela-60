@@ -81,7 +81,9 @@ async function forward(env, payload) {
   if (res.status >= 300 && res.status < 400) {
     const next = new URL(res.headers.get('Location') || '', env.APPS_SCRIPT_URL)
     if (next.protocol !== 'https:' || next.hostname !== GOOGLE_ECHO_HOST) throw new Error('redirect')
-    res = await fetch(next, { redirect: 'error', signal: AbortSignal.timeout(UPSTREAM_TIMEOUT) })
+    // 'manual' e non 'error': il runtime di Cloudflare accetta solo 'follow' o 'manual'.
+    // Un ulteriore redirect non è "ok" e viene scartato qui sotto.
+    res = await fetch(next, { redirect: 'manual', signal: AbortSignal.timeout(UPSTREAM_TIMEOUT) })
   }
   if (!res.ok) throw new Error('status')
   const text = await res.text()
