@@ -28,14 +28,14 @@ describe('wizard RSVP', () => {
     await click(user, 'Sì, ci sarò!')
     expect(await screen.findByRole('heading', { name: 'In quanti sarete?' })).toBeTruthy()
     await click(user, 'Continua')
-    await screen.findByRole('heading', { name: /Chi festeggerà con Carmela/ })
+    await screen.findByRole('heading', { name: 'Chi festeggerà con me?' })
     await user.type(screen.getByLabelText('Nome e cognome'), 'Maria Rossi')
     await click(user, 'Continua')
     await screen.findByRole('heading', { name: 'Riepilogo' })
     expect(screen.getByText('Maria Rossi')).toBeTruthy()
     await click(user, 'Invia conferma')
     expect(await screen.findByRole('heading', { name: 'Grazie! La tua conferma è stata ricevuta.' })).toBeTruthy()
-    expect(screen.getByText('Carmela sarà felice di festeggiare insieme a te!')).toBeTruthy()
+    expect(screen.getByText('Sarò felice di festeggiare insieme a te!')).toBeTruthy()
     expect(submit).toHaveBeenCalledTimes(1)
     const p = submit.mock.calls[0][0]
     expect(p).toMatchObject({ attending: true, guests: [{ name: 'Maria Rossi', dietary: '' }], token: 'token-turnstile' })
@@ -65,7 +65,7 @@ describe('wizard RSVP', () => {
     await screen.findByRole('heading', { name: 'Riepilogo' })
     expect(screen.getByText('Esigenze alimentari: Senza lattosio')).toBeTruthy()
     await click(user, 'Invia conferma')
-    await screen.findByText('Carmela sarà felice di festeggiare insieme a te!')
+    await screen.findByText('Sarò felice di festeggiare insieme a te!')
     expect(submit.mock.calls[0][0]).toMatchObject({
       attending: true,
       guests: [{ name: 'Maria Rossi', dietary: '' }, { name: 'Giuseppe Rossi', dietary: 'Senza lattosio' }],

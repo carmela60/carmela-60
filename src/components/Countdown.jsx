@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { EVENT } from '../config/event.js'
 import { countdown } from '../lib/time.js'
 import { Reveal } from './ui.jsx'
 
@@ -22,7 +21,7 @@ export default function Countdown() {
   if (c.phase !== 'upcoming') {
     return (
       <Reveal as="p" className="countdown-done">
-        {c.phase === 'today' ? 'È arrivato il giorno della festa!' : `Grazie per aver festeggiato con ${EVENT.honoree}.`}
+        {c.phase === 'today' ? 'È arrivato il giorno della festa!' : 'Grazie per aver festeggiato con me.'}
       </Reveal>
     )
   }

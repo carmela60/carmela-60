@@ -14,9 +14,9 @@ const ERRORS = {
   server: 'Si è verificato un problema temporaneo. Tocca di nuovo «Invia conferma» tra qualche istante: i dati inseriti sono ancora qui.',
   rate: 'Troppi tentativi ravvicinati. Attendi un minuto e tocca di nuovo «Invia conferma».',
   invalid: 'Alcuni dati non risultano validi. Controlla il riepilogo e riprova.',
-  config: 'Le conferme online non sono ancora attive. Contatta direttamente chi ti ha invitato.',
+  config: 'Le conferme online non sono ancora attive. Scrivimi direttamente.',
   verify: 'Non siamo riusciti a completare il controllo di sicurezza. Tocca di nuovo «Invia conferma»; se non funziona, prova con un altro browser.',
-  full: 'Le conferme online sono chiuse. Contatta direttamente chi ti ha invitato.',
+  full: 'Le conferme online sono chiuse. Scrivimi direttamente.',
 }
 
 const STEP_NUMBERS = {
@@ -202,7 +202,7 @@ export default function RsvpWizard({ draft, setDraft, onClose, submit = submitRs
     ])
     body = (
       <form onSubmit={check(checks, 'summary')} noValidate>
-        {heading(`Chi festeggerà con ${EVENT.honoree}?`)}
+        {heading('Chi festeggerà con me?')}
         <p className="hint">
           {draft.count > 1 ? 'Inizia da te. ' : ''}Le esigenze alimentari sono facoltative e servono solo per il menù: le cancelleremo dopo la festa.
         </p>
@@ -243,7 +243,7 @@ export default function RsvpWizard({ draft, setDraft, onClose, submit = submitRs
     body = (
       <form onSubmit={check([{ id, error: nameError(draft.guests[0].name) }], 'summary')} noValidate>
         {heading('Ci dispiace che tu non possa esserci')}
-        <p className="hint">Lascia il tuo nome, così {EVENT.honoree} saprà della tua risposta.</p>
+        <p className="hint">Lascia il tuo nome, così saprò della tua risposta.</p>
         <Field
           id={id}
           label="Nome e cognome"
@@ -347,8 +347,8 @@ export default function RsvpWizard({ draft, setDraft, onClose, submit = submitRs
         {heading('Grazie! La tua conferma è stata ricevuta.')}
         <p className="done-text">
           {doneAttending
-            ? `${EVENT.honoree} sarà felice di festeggiare insieme a te!`
-            : `Grazie per avercelo fatto sapere. ${EVENT.honoree} ti ringrazia con affetto.`}
+            ? 'Sarò felice di festeggiare insieme a te!'
+            : 'Grazie per avermelo fatto sapere. Ti abbraccio con affetto.'}
         </p>
         <button type="button" className="btn btn-primary" onClick={onClose}>Torna all'invito</button>
       </div>
