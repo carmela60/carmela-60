@@ -1,0 +1,31 @@
+name = "carmela-60-rsvp"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+# Nessun URL di anteprima aggiuntivo: esiste un solo indirizzo pubblico.
+preview_urls = false
+
+# Nessun log delle richieste: il Worker non scrive mai dati personali.
+[observability]
+enabled = false
+
+[vars]
+# Origin esatti del sito, separati da virgola, senza barra finale. Es: https://utente.github.io
+# In produzione NON lasciare indirizzi localhost.
+ALLOWED_ORIGINS = "https://carmela60.github.io"
+MAX_GUESTS = "8"
+
+# Segreti (NON scriverli qui): impostali con
+#   npx wrangler secret put APPS_SCRIPT_URL
+#   npx wrangler secret put APPS_SCRIPT_SECRET    (almeno 32 caratteri casuali)
+#   npx wrangler secret put TURNSTILE_SECRET
+# Senza tutti e tre, o senza il rate limit, il Worker rifiuta ogni invio.
+
+# Rate limit gratuito: 5 invii al minuto per indirizzo IP.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1060"
+
+  [ratelimits.simple]
+  limit = 5
+  period = 60
