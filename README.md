@@ -177,7 +177,7 @@ Dal sito pubblicato, compila il wizard con un nome di prova (es. "Prova Prova") 
 
 ### 9. Verificare le righe
 
-- Scheda **Conferme**: una riga per invio con ID, data e ora, referente, Sì/No, numero di partecipanti, stato "Ricevuta".
+- Scheda **Conferme**: una riga per invio con ID, data e ora, referente, Sì/No, numero di partecipanti, nomi di tutto il gruppo, stato "Ricevuta".
 - Scheda **Partecipanti**: una riga per persona, collegata alla conferma tramite **ID conferma**.
 - Il totale degli invitati è la somma della colonna "Numero partecipanti" (oppure il numero di righe in Partecipanti).
 

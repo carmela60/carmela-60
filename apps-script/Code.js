@@ -18,7 +18,7 @@ var MAX_NAME = 80
 var MAX_DIETARY = 200
 var SHEET_CONFERME = 'Conferme'
 var SHEET_PARTECIPANTI = 'Partecipanti'
-var HEAD_CONFERME = ['ID conferma', 'Data e ora invio', 'Nome referente', 'Partecipazione (Sì/No)', 'Numero partecipanti', 'Stato conferma']
+var HEAD_CONFERME = ['ID conferma', 'Data e ora invio', 'Nome referente', 'Partecipazione (Sì/No)', 'Numero partecipanti', 'Nomi partecipanti', 'Stato conferma']
 var HEAD_PARTECIPANTI = ['ID conferma', 'Nome e cognome', 'Eventuali esigenze alimentari']
 var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 var NAME_RE = /^\p{L}[\p{L}\p{M} '’.-]*$/u
@@ -157,6 +157,8 @@ function rows_(data, now) {
       safe_(data.guests[0].name),
       data.attending ? 'Sì' : 'No',
       data.attending ? data.guests.length : 0,
+      // Tutto il gruppo in una cella, per leggerlo senza aprire la scheda Partecipanti.
+      data.attending ? safe_(data.guests.map(function (g) { return g.name }).join(', ')) : '',
       'Ricevuta',
     ],
     partecipanti: data.attending
@@ -166,14 +168,16 @@ function rows_(data, now) {
 }
 
 function sheet_(ss, name, head) {
-  var sh = ss.getSheetByName(name)
-  if (!sh) {
-    sh = ss.insertSheet(name)
+  var sh = ss.getSheetByName(name) || ss.insertSheet(name)
+  // Crea o aggiorna le intestazioni (es. dopo l'aggiunta di una colonna). Le righe esistenti non vengono spostate.
+  var current = sh.getRange(1, 1, 1, head.length).getValues()[0]
+  if (current.join('|') !== head.join('|')) {
     sh.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight('bold')
     sh.setFrozenRows(1)
     if (name === SHEET_CONFERME) {
       sh.getRange('B:B').setNumberFormat('dd/MM/yyyy HH:mm:ss')
       sh.getRange('C:C').setNumberFormat('@')
+      sh.getRange('F:F').setNumberFormat('@')
     } else {
       sh.getRange('B:C').setNumberFormat('@')
     }

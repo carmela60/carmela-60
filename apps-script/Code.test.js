@@ -23,7 +23,10 @@ function fakeSheet() {
           }),
         }
       }
-      return { setValues: values => { values.forEach((v, i) => { rows[a - 1 + i] = [...v] }); return { setFontWeight: () => {} } } }
+      return {
+        getValues: () => [rows[a - 1] ? [...rows[a - 1]] : []],
+        setValues: values => { values.forEach((v, i) => { rows[a - 1 + i] = [...v] }); return { setFontWeight: () => {} } },
+      }
     },
     getLastRow: () => rows.length,
     setFrozenRows: () => {},
@@ -69,10 +72,10 @@ describe('Apps Script: scrittura', () => {
     const res = post(yes([{ name: 'Maria  Rossi', dietary: '' }, { name: 'Giuseppe Rossi', dietary: 'Senza lattosio' }]))
     expect(res).toEqual({ ok: true, id: ID })
     const [head, row] = sheets.Conferme.rows
-    expect(head).toEqual(['ID conferma', 'Data e ora invio', 'Nome referente', 'Partecipazione (Sì/No)', 'Numero partecipanti', 'Stato conferma'])
+    expect(head).toEqual(['ID conferma', 'Data e ora invio', 'Nome referente', 'Partecipazione (Sì/No)', 'Numero partecipanti', 'Nomi partecipanti', 'Stato conferma'])
     expect(row[0]).toBe(ID)
     expect(row[1]).toBeInstanceOf(vm.runInContext('Date', ctx))
-    expect(row.slice(2)).toEqual(['Maria Rossi', 'Sì', 2, 'Ricevuta'])
+    expect(row.slice(2)).toEqual(['Maria Rossi', 'Sì', 2, 'Maria Rossi, Giuseppe Rossi', 'Ricevuta'])
     expect(sheets.Partecipanti.rows).toEqual([
       ['ID conferma', 'Nome e cognome', 'Eventuali esigenze alimentari'],
       [ID, 'Maria Rossi', ''],
@@ -83,7 +86,7 @@ describe('Apps Script: scrittura', () => {
 
   it('partecipazione negativa: solo la conferma, zero partecipanti', () => {
     expect(post({ id: ID, attending: false, guests: [{ name: 'Luca Bianchi' }] }).ok).toBe(true)
-    expect(sheets.Conferme.rows[1].slice(2)).toEqual(['Luca Bianchi', 'No', 0, 'Ricevuta'])
+    expect(sheets.Conferme.rows[1].slice(2)).toEqual(['Luca Bianchi', 'No', 0, '', 'Ricevuta'])
     expect(sheets.Partecipanti.rows).toHaveLength(1)
   })
 
@@ -165,6 +168,14 @@ describe('Apps Script: tetti e riservatezza', () => {
     expect(post(yes([{ name: 'Anna Verdi' }], { id: ID2 }))).toEqual({ ok: false, error: 'full' })
     // un reinvio di una conferma già registrata resta riconosciuto anche a foglio pieno
     expect(post(yes([{ name: 'Maria Rossi' }]))).toEqual({ ok: true, id: ID, duplicate: true })
+  })
+
+  it('aggiorna le intestazioni di un foglio creato con la versione precedente', () => {
+    post(yes([{ name: 'Maria Rossi' }]))
+    sheets.Conferme.rows[0] = ['ID conferma', 'Data e ora invio', 'Nome referente', 'Partecipazione (Sì/No)', 'Numero partecipanti', 'Stato conferma']
+    post(yes([{ name: 'Anna Verdi' }], { id: ID2 }))
+    expect(sheets.Conferme.rows[0][5]).toBe('Nomi partecipanti')
+    expect(sheets.Conferme.rows[2].slice(5)).toEqual(['Anna Verdi', 'Ricevuta'])
   })
 
   it('rilascia il lock anche in caso di errore e risponde busy se occupato', () => {
